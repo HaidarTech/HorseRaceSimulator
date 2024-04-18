@@ -85,6 +85,15 @@ public class Race
             //if any of the three horses has won the race is finished
             if ( raceWonBy(lane1Horse) || raceWonBy(lane2Horse) || raceWonBy(lane3Horse) )
             {
+                if (raceWonBy(lane1Horse)){
+                    System.out.println(lane1Horse.getName());
+                }
+                else if (raceWonBy(lane2Horse)){
+                    System.out.println(lane2Horse.getName());
+                }
+                else{
+                    System.out.println(lane3Horse.getName());
+                }
                 finished = true;
             }
            
