@@ -85,9 +85,25 @@ public class Race
             //if any of the three horses has won the race is finished
             if ( raceWonBy(lane1Horse) || raceWonBy(lane2Horse) || raceWonBy(lane3Horse) )
             {
+                if (raceWonBy(lane1Horse)){
+                    System.out.println(lane1Horse.getName() + " wins!");
+                    finished = true;
+                }
+                else if (raceWonBy(lane2Horse)){
+                    System.out.println(lane2Horse.getName() + " wins!");
+                    finished = true;
+                }
+                else{
+                    System.out.println(lane3Horse.getName() + " wins!");
+                    finished = true;
+                }
                 finished = true;
             }
-           
+
+            else if (lane1Horse.hasFallen() && lane2Horse.hasFallen() && lane3Horse.hasFallen()){
+                System.out.println("All horses have fallen!");
+                finished = true;
+            }
             //wait for 100 milliseconds
             try{ 
                 TimeUnit.MILLISECONDS.sleep(100);
@@ -124,6 +140,8 @@ public class Race
             }
         }
     }
+
+
         
     /** 
      * Determines if a horse has won the race
@@ -187,6 +205,7 @@ public class Race
         
         //if the horse has fallen then print dead
         //else print the horse's symbol
+
         if(theHorse.hasFallen())
         {
             System.out.print('\u2322');
