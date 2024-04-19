@@ -87,14 +87,20 @@ public class Race
             {
                 if (raceWonBy(lane1Horse)){
                     System.out.println(lane1Horse.getName() + " wins!");
+                    lane1Horse.setConfidence(lane1Horse.getConfidence() + 0.1);
+                    printRace();
                     finished = true;
                 }
                 else if (raceWonBy(lane2Horse)){
                     System.out.println(lane2Horse.getName() + " wins!");
+                    lane2Horse.setConfidence(lane1Horse.getConfidence() + 0.1);
+                    printRace();
                     finished = true;
                 }
                 else{
                     System.out.println(lane3Horse.getName() + " wins!");
+                    lane3Horse.setConfidence(lane1Horse.getConfidence() + 0.1);
+                    printRace();
                     finished = true;
                 }
                 finished = true;
@@ -137,6 +143,7 @@ public class Race
             if (Math.random() < (0.1*theHorse.getConfidence()*theHorse.getConfidence()))
             {
                 theHorse.fall();
+                theHorse.setConfidence(theHorse.getConfidence() - 0.1);
             }
         }
     }
@@ -198,7 +205,8 @@ public class Race
         int spacesAfter = raceLength - theHorse.getDistanceTravelled();
         
         //print a | for the beginning of the lane
-        System.out.print('|');
+        System.out.print('|'); 
+
         
         //print the spaces before the horse
         multiplePrint(' ',spacesBefore);
@@ -208,7 +216,7 @@ public class Race
 
         if(theHorse.hasFallen())
         {
-            System.out.print('\u2322');
+            System.out.print('\u0078');
         }
         else
         {
@@ -220,6 +228,9 @@ public class Race
         
         //print the | for the end of the track
         System.out.print('|');
+
+        // prints out stats of each racer
+        System.out.printf("\t%s (Current confidence: %.1f)", theHorse.getName(), theHorse.getConfidence());
     }
         
     

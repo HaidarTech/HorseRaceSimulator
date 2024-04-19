@@ -6,7 +6,7 @@ public class Main {
         // Create three horses with different confidence levels
 	Horse horse1 = new Horse("Lightning", '\u2658', 0.9);
 	Horse horse2 = new Horse("Thunder", '\u265E', 0.8);
-	Horse horse3 = new Horse("Storm", '\u2658', 0.85);
+	Horse horse3 = new Horse("Storm", '\u2658', 0.7);
 
 
         // Add horses to the race
