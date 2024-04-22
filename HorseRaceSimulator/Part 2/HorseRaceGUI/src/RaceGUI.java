@@ -23,9 +23,14 @@ public class RaceGUI extends Application {
         root.setAlignment(Pos.CENTER);
 
         Label labelCharacter = new Label("What character will your horse be?");
-        ObservableList<String> options = FXCollections.observableArrayList("Knight", "Horse", "Castle");
+        ObservableList<String> options = FXCollections.observableArrayList("Knight", "Bishop", "Castle");
         ComboBox<String> comboBox = new ComboBox<>(options);
         comboBox.setPromptText("Select your character");
+
+        // TextField for horse name
+        Label labelName = new Label("Name your horse:");
+        TextField textFieldName = new TextField();
+        textFieldName.setPromptText("Enter horse name");
 
         Label labelDistance = new Label("Set the race distance:");
         TextField textFieldDistance = new TextField();
@@ -38,19 +43,22 @@ public class RaceGUI extends Application {
             raceTrack.setPrefSize(600, 400);
 
             Stage raceStage = new Stage();
+            String horseName = textFieldName.getText().isEmpty() ? "Lightning" : textFieldName.getText(); // Default name if empty
+            char selectedSymbol = comboBox.getValue().equals("Knight") ? '\u2658' : 
+                                  comboBox.getValue().equals("Bishop") ? '\u2657' : '\u2656';
             race = new Race(distance, raceTrack, raceStage, primaryStage); // Pass both stages
-            race.addHorse(new Horse("Lightning", '\u2658', 0.9), 1);
-            race.addHorse(new Horse("Thunder", '\u2658', 0.8), 2);
-            race.addHorse(new Horse("Storm", '\u2658', 0.7), 3);
+            race.addHorse(new Horse(horseName, selectedSymbol, 0.9), 1);
+            race.addHorse(new Horse("Thunder", '\u2658', 0.8), 2); // Example symbol
+            race.addHorse(new Horse("Storm", '\u2658', 0.7), 3); // Example symbol
 
             raceStage.setTitle("Race Track");
             raceStage.setScene(new Scene(raceTrack, 600, 400));
             raceStage.show();
         });
 
-        root.getChildren().addAll(labelCharacter, comboBox, labelDistance, textFieldDistance, buttonStartRace);
+        root.getChildren().addAll(labelCharacter, comboBox, labelName, textFieldName, labelDistance, textFieldDistance, buttonStartRace);
 
-        Scene scene = new Scene(root, 300, 250);
+        Scene scene = new Scene(root, 300, 400); // Increased size to fit additional inputs
         stage.setTitle("Character and Race Setup");
         stage.setScene(scene);
         stage.show();
