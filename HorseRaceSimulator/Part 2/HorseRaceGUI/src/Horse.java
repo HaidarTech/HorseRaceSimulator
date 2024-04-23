@@ -27,6 +27,7 @@
    private double confidence;
    private int distanceTravelled;
    private boolean fallen;
+   private double lastRaceTime; // Time taken in the last race in seconds
 
     //Constructor of class Horse
    /**
@@ -39,6 +40,13 @@
        this.distanceTravelled = 0;
        this.fallen = false;
    }
+
+   public void move() {
+    if (!this.fallen) {
+        this.distanceTravelled += 1;  // Increment by 1 for simplicity, or adjust based on actual movement logic
+    }
+}
+
 
    // Setters and Getters
    public String getName() {
@@ -82,6 +90,16 @@
            this.distanceTravelled++;
        }
    }
+
+    public void setLastRaceTime(double lastRaceTime) {
+        this.lastRaceTime = lastRaceTime;
+    }
+
+    public double getLastRaceTime() {
+        return this.lastRaceTime;
+    }
+
+    
 
 }
 
