@@ -82,5 +82,6 @@
            this.distanceTravelled++;
        }
    }
+
 }
 

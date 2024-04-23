@@ -1,56 +1,31 @@
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.Random;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
 
 public class Race {
-    int raceLength;
+    int raceLength;  // This is in pixels for simplicity, adjust if in different units like meters
     Horse[] horses = new Horse[3];
-    Pane raceTrack;
     Text[] horseLabels = new Text[3];
     Timeline timeline;
     Stage raceStage; // Race window stage
     Stage primaryStage; // Main setup window stage
     Random rand = new Random();
+    private String winningHorse = null;
+    private Points pointsManager;  // Use Points class for managing points
+    private RaceTrack raceTrack;  // Instance of RaceTrack class
 
-    public Race(int distance, Pane raceTrack, Stage raceStage, Stage primaryStage) {
-        this.raceLength = distance;
-        this.raceTrack = raceTrack;
+    public Race(int distance, Pane raceTrackPane, Stage raceStage, Stage primaryStage, Points pointsManager) {
+        this.raceLength = distance * 10; // scale distance to pixel if needed
         this.raceStage = raceStage;
         this.primaryStage = primaryStage;
-        drawRaceTrack();
+        this.pointsManager = pointsManager;
+        this.raceTrack = new RaceTrack(raceTrackPane, raceLength); // Initialize the race track
         startRace();
-    }
-
-    private void drawRaceTrack() {
-        for (int i = 0; i < 3; i++) {  // Loop for three lanes
-            // Line above each horse
-            Line lineAbove = new Line(10, (50 + i * 100) - 10, raceLength * 10 + 10, (50 + i * 100) - 10);
-            // Line below each horse
-            Line lineBelow = new Line(10, (80 + i * 100) + 10, raceLength * 10 + 10, (80 + i * 100) + 10);
-
-            // Set the dash pattern for both lines
-            lineAbove.getStrokeDashArray().addAll(10.0, 10.0); // Dash length of 10, space length of 10
-            lineBelow.getStrokeDashArray().addAll(10.0, 10.0); // Dash length of 10, space length of 10
-
-            // Adding lines to the Pane
-            raceTrack.getChildren().addAll(lineAbove, lineBelow);
-        }
-
-        // Vertical lines at the start and end of the track
-        Line startLine = new Line(10, 40, 10, 260);
-        Line endLine = new Line(raceLength * 10 + 10, 40, raceLength * 10 + 10, 260);
-
-        // Also making vertical lines dashed if desired
-        startLine.getStrokeDashArray().addAll(10.0, 10.0);
-        endLine.getStrokeDashArray().addAll(10.0, 10.0);
-
-        raceTrack.getChildren().addAll(startLine, endLine);
     }
 
     public void addHorse(Horse horse, int lane) {
@@ -64,13 +39,12 @@ public class Race {
 
     private void displayHorse(Horse horse, int lane) {
         if (horse == null) return;
-
         Text horseLabel = new Text(horse.getSymbol() + " " + horse.getName());
         horseLabel.setFont(Font.font("Verdana", 20));
         horseLabel.setY(50 * lane + 15);
         horseLabel.setX(10);
         horseLabels[lane - 1] = horseLabel;
-        raceTrack.getChildren().add(horseLabel);
+        raceTrack.getRaceTrack().getChildren().add(horseLabel);
     }
 
     private void startRace() {
@@ -78,48 +52,49 @@ public class Race {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
+
     private void moveHorses() {
-        boolean raceEnded = false;
-        boolean allFallen = true;  // Track if all horses have fallen
-    
+        boolean allFallen = true;
+        double trackEnd = raceLength;
+        
         for (int i = 0; i < horseLabels.length; i++) {
             Text horseLabel = horseLabels[i];
             Horse horse = horses[i];
-            if (horseLabel != null && !horse.hasFallen()) {
-                allFallen = false; // At least one horse has not fallen
-    
-                // Decrease the chance of falling further; using a very low base chance of 2%
-                double fallChance = 0.02 * (1 - horse.getConfidence());
-                if (Math.random() < fallChance) {
-                    horse.fall();
-                    horseLabel.setText(horse.getSymbol() + " X"); // Mark as fallen
-                }
-    
-                if (!horse.hasFallen()) {
-                    double xPosition = horseLabel.getLayoutX() + rand.nextInt(3) + 1; // Small random increment
-                    if (xPosition < raceLength * 10 + 10) {
-                        horseLabel.setLayoutX(xPosition);
-                    } else {
-                        raceEnded = true;
-                        timeline.stop();
-                        System.out.println(horse.getName() + " wins!");
-                        finishRace();
-                        break;
+            if (!horse.hasFallen() && Math.random() < 0.01 * (1 - horse.getConfidence())) {
+                horse.fall();
+                horseLabel.setText(horse.getSymbol() + " X");
+            }
+
+            if (!horse.hasFallen()) {
+                double xPosition = horseLabel.getLayoutX() + rand.nextInt(3) + 1;
+                if (xPosition >= trackEnd) {
+                    horseLabel.setLayoutX(trackEnd);
+                    timeline.stop();
+                    if (winningHorse == null) {
+                        winningHorse = horse.getName();
+                        pointsManager.addPoints(10); // Add points only once for the first horse to finish
                     }
+                    finishRace();
+                } else {
+                    horseLabel.setLayoutX(xPosition);
+                    allFallen = false;
                 }
             }
         }
-    
-        // Check if all horses have fallen and stop the race if true
+
         if (allFallen) {
-            timeline.stop();
             System.out.println("All horses have fallen! Race is over.");
+            timeline.stop();
             finishRace();
         }
     }
-    
+
     private void finishRace() {
-        raceStage.close(); // Close the race stage
-        primaryStage.close(); // Close the primary stage
+        raceStage.close();
+        primaryStage.close();
+    }
+
+    public boolean didYourHorseWin(String yourHorseName) {
+        return yourHorseName.equals(winningHorse);
     }
 }
