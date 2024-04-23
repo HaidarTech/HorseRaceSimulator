@@ -1,21 +1,26 @@
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
 
 public class RaceTrack {
     private Pane raceTrack;
     private int raceLength;
+    private Text resultsLabel; // Label to display race results
 
     public RaceTrack(Pane raceTrack, int raceLength) {
         this.raceTrack = raceTrack;
         this.raceLength = raceLength;
+        this.resultsLabel = new Text(); // Initialize the text for results
+        this.resultsLabel.setFont(Font.font("Verdana", 14));
+        this.resultsLabel.setX(raceLength + 20); // Position it just past the end line
+        this.resultsLabel.setY(50); // Vertical position
         drawRaceTrack(this.raceLength);
+        this.raceTrack.getChildren().add(resultsLabel); // Add results label to the race track
     }
 
     private void drawRaceTrack(int raceLength) {
-
-        // Debugging output to ensure raceLength is correctly calculated
         System.out.println("Race length in pixels: " + raceLength);
-
 
         for (int i = 0; i < 2; i++) {
             Line lineAbove = new Line(10, (50 + i * 100) - 10, raceLength, (50 + i * 100) - 10);
@@ -25,18 +30,21 @@ public class RaceTrack {
             raceTrack.getChildren().addAll(lineAbove, lineBelow);
         }
 
-        // draw vertical lines for track at 0 and TrackEnd
-        Line startLine = new Line(10, 10, 10, 200);
-        Line endLine = new Line(raceLength, 40, raceLength, 340);
-        startLine.setStrokeWidth(2);  // Make the line thicker for visibility
-        endLine.setStrokeWidth(2);    // Make the line thicker for visibility
+        Line startLine = new Line(10, 40, 10, 190);
+        Line endLine = new Line(raceLength, 40, raceLength, 190);
+        startLine.setStrokeWidth(2);
+        endLine.setStrokeWidth(2);
         raceTrack.getChildren().addAll(startLine, endLine);
-    
-        // Debugging to confirm lines are added
-        System.out.println("Start line and end line added with end line at: " + (raceLength));
+        System.out.println("Start line and end line added with end line at: " + raceLength);
     }
 
     public Pane getRaceTrack() {
         return raceTrack;
     }
+
+    // Method to update results display
+    public void updateResults(String resultsText) {
+    this.resultsLabel.setText(resultsText); // Update the label with provided text
+}
+
 }
