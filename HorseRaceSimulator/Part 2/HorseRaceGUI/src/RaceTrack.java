@@ -2,6 +2,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
+import javafx.scene.control.Label;
 
 public class RaceTrack {
     private Pane raceTrack;
@@ -36,6 +37,7 @@ public class RaceTrack {
         endLine.setStrokeWidth(2);
         raceTrack.getChildren().addAll(startLine, endLine);
         System.out.println("Start line and end line added with end line at: " + raceLength);
+
     }
 
     public Pane getRaceTrack() {

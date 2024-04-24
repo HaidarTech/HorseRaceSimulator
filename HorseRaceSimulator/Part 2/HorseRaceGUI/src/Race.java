@@ -1,17 +1,15 @@
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.scene.text.Text;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.Random;
-import javafx.scene.layout.Pane;
-import javafx.scene.text.Font;
-import java.util.Arrays;
+import javafx.scene.image.ImageView;
 
 public class Race {
     int raceLength;  // This is in pixels for simplicity, adjust if in different units like meters
     Horse[] horses = new Horse[3];
-    Text[] horseLabels = new Text[3];
+    ImageView[] horseViews = new ImageView[3];
     Timeline timeline;
     Stage raceStage; // Race window stage
     Stage primaryStage; // Main setup window stage
@@ -42,15 +40,22 @@ public class Race {
         displayHorse(horse, lane);
     }
 
+
     private void displayHorse(Horse horse, int lane) {
         if (horse == null) return;
-        Text horseLabel = new Text(horse.getSymbol() + " " + horse.getName());
-        horseLabel.setFont(Font.font("Verdana", 20));
-        horseLabel.setY(50 * lane + 15);
-        horseLabel.setX(10);
-        horseLabels[lane - 1] = horseLabel;
-        raceTrack.getRaceTrack().getChildren().add(horseLabel);
+        ImageView horseView = new ImageView(horse.getImage()); // Assuming horse.getImage() returns an Image object
+        horseView.setX(10); // Starting X position
+    
+        // Adjust the Y position and size of the image
+        horseView.setY(lane * 50); // Adjusting Y position based on lane to avoid overlap
+        horseView.setFitWidth(100); // Set the width of the image
+        horseView.setFitHeight(50); // Set the height of the image
+        horseView.setPreserveRatio(true); // Preserve the aspect ratio
+    
+        horseViews[lane - 1] = horseView;
+        raceTrack.getRaceTrack().getChildren().add(horseView);
     }
+
 
     private void startRace() {
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> moveHorses()));
@@ -60,11 +65,11 @@ public class Race {
 
     private void moveHorses() {
         boolean allFinished = true;
-        for (int i = 0; i < horseLabels.length; i++) {
-            Text horseLabel = horseLabels[i];
+        for (int i = 0; i < horseViews.length; i++) {
+            ImageView horseView = horseViews[i];
             Horse horse = horses[i];
-            if (!horse.hasFallen() && horseLabel.getLayoutX() < raceLength) {
-                double xPosition = horseLabel.getLayoutX() + rand.nextInt(3) + 1;
+            if (!horse.hasFallen() && horseView.getX() < raceLength) {
+                double xPosition = horseView.getX() + rand.nextInt(3) + 1;
                 if (xPosition >= raceLength - 30) {
                     xPosition = raceLength;
                     if (horse.getLastRaceTime() == 0) {  // Ensure last race time is set only once
@@ -74,7 +79,7 @@ public class Race {
                     }
                 } else {
                     allFinished = false;
-                    horseLabel.setLayoutX(xPosition);
+                    horseView.setX(xPosition);
                 }
             }
         }
@@ -83,18 +88,12 @@ public class Race {
             finishRace();
         }
     }
-    
-    
-    
-    
 
     private void updateRaceStatistics() {
         if (raceStatistics != null) {
             raceStatistics.updateRaceStats(this);
         }
     }
-
-    
     
     private void finishRace() {
         StringBuilder resultsBuilder = new StringBuilder();
@@ -118,13 +117,10 @@ public class Race {
         raceStatistics.saveStatistics();  // Explicitly save to file after updating
     }
     
-
-
     public String getWinningHorse() {
         return winningHorse;
     }
     
-
     public boolean didYourHorseWin(String yourHorseName) {
         return yourHorseName.equals(winningHorse);
     }

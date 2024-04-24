@@ -5,12 +5,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.geometry.Pos;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.text.Text;
 
 public class RaceGUI extends Application {
     private Race race;
@@ -25,10 +27,10 @@ public class RaceGUI extends Application {
         VBox root = new VBox(10);
         root.setAlignment(Pos.CENTER);
 
-        Label labelCharacter = new Label("What character will your horse be?");
-        ObservableList<String> options = FXCollections.observableArrayList("Knight", "Bishop", "Castle");
+        Label labelCharacter = new Label("Choose your horse breed:");
+        ObservableList<String> options = FXCollections.observableArrayList("Clydesdale", "Shetland", "Shire");
         ComboBox<String> comboBox = new ComboBox<>(options);
-        comboBox.setPromptText("Select your character");
+        comboBox.setPromptText("Select a breed");
 
         Label labelName = new Label("Name your horse:");
         TextField textFieldName = new TextField();
@@ -58,38 +60,56 @@ public class RaceGUI extends Application {
         stage.show();
     }
 
-        private void handleRaceStart(ComboBox<String> comboBox, TextField textFieldName, TextField textFieldDistance) {
-            try {
-                int bet = Integer.parseInt(betAmountField.getText().trim());
-                if (bet > 0 && !pointsManager.canPlaceBet(bet)) {
-                    pointsLabel.setText("Error: Insufficient points for this bet");
-                    return;
+                // Helper method to get image paths based on the selected horse type
+                private String determineImagePath(String horseType) {
+                    switch (horseType.toLowerCase()) {
+                        case "clydesdale":
+                            return "C:/Users/Haidar/Desktop/Horsesim/HorseRaceSimulator/HorseRaceSimulator/Part 2/HorseRaceGUI/src/images/Clydesdale.png";
+                        case "shetland":
+                            return "C:/Users/Haidar/Desktop/Horsesim/HorseRaceSimulator/HorseRaceSimulator/Part 2/HorseRaceGUI/src/images/Shetland.png";
+                        case "shire":
+                            return "C:/Users/Haidar/Desktop/Horsesim/HorseRaceSimulator/HorseRaceSimulator/Part 2/HorseRaceGUI/src/images/Shire.png";
+                        default:
+                            return "/images/default.png"; // Default image if needed
+                    }
                 }
+                
 
-                int distance = Integer.parseInt(textFieldDistance.getText()); // Capture distance from text field
-                Pane raceTrackPane = new Pane();
-                raceTrackPane.setPrefSize(600, 400); // You might want to adjust or remove this line depending on how distance is handled visually
-
-                Stage raceStage = new Stage();
-                String horseName = textFieldName.getText().isEmpty() ? "Lightning" : textFieldName.getText();
-                char selectedSymbol = comboBox.getValue().equals("Knight") ? '\u2658' :
-                                    comboBox.getValue().equals("Bishop") ? '\u2657' : '\u2656';
-                race = new Race(distance, raceTrackPane, raceStage, primaryStage, pointsManager);
-                race.addHorse(new Horse(horseName, selectedSymbol, 0.9), 1);
-                race.addHorse(new Horse("Thunder", '\u2658', 0.8), 2);
-                race.addHorse(new Horse("Storm", '\u2658', 0.7), 3);
-
-                raceStage.setTitle("Race Track");
-                raceStage.setScene(new Scene(raceTrackPane, 600, 400));
-                raceStage.show();
-
-                raceStage.setOnHidden(e -> {
-                    updatePointsAfterRace(horseName, bet);
-                });
-            } catch (NumberFormatException e) {
-                pointsLabel.setText("Error: Invalid bet amount");
-            }
-    }
+                private void handleRaceStart(ComboBox<String> comboBox, TextField textFieldName, TextField textFieldDistance) {
+                    try {
+                        int bet = Integer.parseInt(betAmountField.getText().trim());
+                        if (bet > 0 && !pointsManager.canPlaceBet(bet)) {
+                            pointsLabel.setText("Error: Insufficient points for this bet");
+                            return;
+                        }
+                
+                        int distance = Integer.parseInt(textFieldDistance.getText()); // Capture distance from text field
+                        Pane raceTrackPane = new Pane();
+                        raceTrackPane.setPrefSize(600, 400); // You might want to adjust or remove this line depending on how distance is handled visually
+                
+                        Stage raceStage = new Stage();
+                        String horseName = textFieldName.getText().isEmpty() ? "Lightning" : textFieldName.getText();
+                        String imagePath = determineImagePath(comboBox.getValue().toString()); // Helper method to determine the image path
+                
+                        // Instantiate the Race object here before adding horses
+                        race = new Race(distance, raceTrackPane, raceStage, primaryStage, pointsManager);
+                
+                        race.addHorse(new Horse(horseName, imagePath, 0.9), 1);
+                        race.addHorse(new Horse("Thunder", determineImagePath("Shetland"), 0.8), 2);
+                        race.addHorse(new Horse("Storm", determineImagePath("Shire"), 0.7), 3);
+                
+                        raceStage.setTitle("Race Track");
+                        raceStage.setScene(new Scene(raceTrackPane, 600, 400));
+                        raceStage.show();
+                
+                        raceStage.setOnHidden(e -> {
+                            updatePointsAfterRace(horseName, bet);
+                        });
+                    } catch (NumberFormatException e) {
+                        pointsLabel.setText("Error: Invalid bet amount");
+                    }
+                }
+                
 
     private void updatePointsAfterRace(String horseName, int bet) {
         boolean won = race.didYourHorseWin(horseName);
@@ -100,7 +120,6 @@ public class RaceGUI extends Application {
     private void updatePointsDisplay() {
         pointsLabel.setText("Your Points: " + pointsManager.getPoints());
     }
-
 
     private void displayStatistics() {
         StringBuilder statsContent = new StringBuilder();
@@ -123,7 +142,7 @@ public class RaceGUI extends Application {
         } catch (FileNotFoundException e) {
             statsContent.append("Statistics file not found.");
         }
-    
+
         Stage statsStage = new Stage();
         VBox statsLayout = new VBox(10);
         statsLayout.setAlignment(Pos.CENTER);
@@ -132,13 +151,13 @@ public class RaceGUI extends Application {
         scrollPane.setContent(statsText);
         scrollPane.setFitToWidth(true);
         statsLayout.getChildren().add(scrollPane);
-    
+
         Scene scene = new Scene(statsLayout, 300, 200);
         statsStage.setTitle("Horse Statistics");
         statsStage.setScene(scene);
         statsStage.show();
     }
-    
+
     public static void main(String[] args) {
         launch(args);
     }

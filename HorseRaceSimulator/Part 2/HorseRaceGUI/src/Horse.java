@@ -18,78 +18,77 @@
 
 
 
- public class Horse {
+ import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
-    //Fields of class Horse
-   
-   private String name;
-   private char symbol;
-   private double confidence;
-   private int distanceTravelled;
-   private boolean fallen;
-   private double lastRaceTime; // Time taken in the last race in seconds
+import javafx.scene.image.Image;
 
-    //Constructor of class Horse
-   /**
-    * Constructor for objects of class Horse
-    */
-   public Horse(String name, char symbol, double confidence) {
-       this.name = name;
-       this.symbol = symbol;
-       this.confidence = confidence;
-       this.distanceTravelled = 0;
-       this.fallen = false;
-   }
+public class Horse {
+    private String name;
+    private Image image;
+    private double confidence;
+    private int distanceTravelled;
+    private boolean fallen;
+    private double lastRaceTime; // Time taken in the last race in seconds
 
-   public void move() {
-    if (!this.fallen) {
-        this.distanceTravelled += 1;  // Increment by 1 for simplicity, or adjust based on actual movement logic
+    /**
+     * Constructor for objects of class Horse
+     */
+    public Horse(String name, String imagePath, double confidence) {
+        this.name = name;
+        this.confidence = confidence;
+        this.distanceTravelled = 0;
+        this.fallen = false;
+        try {
+            // Using FileInputStream to load the image
+            FileInputStream inputstream = new FileInputStream(imagePath);
+            this.image = new Image(inputstream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("Error loading image: " + imagePath);
+            // Optionally throw a runtime exception or handle the error as required
+            throw new RuntimeException("Image file not found: " + imagePath);
+        }
     }
-}
+    // Getter for image to use in ImageView
+    public Image getImage() {
+        return this.image;
+    }
 
+    // Other getters and setters
+    public String getName() {
+        return this.name;
+    }
 
-   // Setters and Getters
-   public String getName() {
-       return this.name;
-   }
+    public void setConfidence(double newConfidence) {
+        this.confidence = newConfidence;
+    }
 
-   public void setSymbol(char newSymbol) {
-       this.symbol = newSymbol;
-   }
+    public double getConfidence() {
+        return this.confidence;
+    }
 
-   public char getSymbol() {
-       return this.symbol;
-   }
+    public int getDistanceTravelled() {
+        return this.distanceTravelled;
+    }
 
-   public void setConfidence(double newConfidence) {
-       this.confidence = newConfidence;
-   }
+    public void fall() {
+        this.fallen = true;
+    }
 
-   public double getConfidence() {
-       return this.confidence;
-   }
+    public boolean hasFallen() {
+        return this.fallen;
+    }
 
-   public int getDistanceTravelled() {
-       return this.distanceTravelled;
-   }
+    public void goBackToStart() {
+        this.distanceTravelled = 0;
+    }
 
-   public void fall() {
-       this.fallen = true;
-   }
-
-   public boolean hasFallen() {
-       return this.fallen;
-   }
-
-   public void goBackToStart() {
-       this.distanceTravelled = 0;
-   }
-
-   public void moveForward() {
-       if (!this.fallen) {
-           this.distanceTravelled++;
-       }
-   }
+    public void moveForward() {
+        if (!this.fallen) {
+            this.distanceTravelled++;
+        }
+    }
 
     public void setLastRaceTime(double lastRaceTime) {
         this.lastRaceTime = lastRaceTime;
@@ -98,8 +97,4 @@
     public double getLastRaceTime() {
         return this.lastRaceTime;
     }
-
-    
-
 }
-
