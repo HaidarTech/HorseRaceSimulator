@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            "projectName": "${workspaceFolderBasename}",
+            "vmArgs": "--module-path C:/Users/Haidar/javafx-sdk-22.0.1/src.zip --add-modules javafx.controls,javafx.fxml"
+        }
+    ]
+}

@@ -111,11 +111,12 @@ public class RaceGUI extends Application {
                 }
                 
 
-    private void updatePointsAfterRace(String horseName, int bet) {
-        boolean won = race.didYourHorseWin(horseName);
-        pointsManager.updatePoints(won, bet);
-        updatePointsDisplay();
-    }
+private void updatePointsAfterRace(String horseName, int bet) {
+    boolean won = race.didYourHorseWin(horseName);
+    pointsManager.updatePoints(won, bet);  // Ensure 'won' is true if the horse actually won
+    updatePointsDisplay();
+}
+
 
     private void updatePointsDisplay() {
         pointsLabel.setText("Your Points: " + pointsManager.getPoints());
