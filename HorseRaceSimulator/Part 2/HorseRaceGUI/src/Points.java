@@ -18,8 +18,10 @@ public class Points {
 
     public void updatePoints(boolean won, int betAmount) {
         if (won) {
+            addPoints(10);
             addPoints(betAmount);  // If won, double the bet
         } else {
+            addPoints(10);
             subtractPoints(betAmount);  // If lost, subtract the bet
         }
     }

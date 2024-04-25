@@ -60,6 +60,12 @@ public class Horse {
         return this.name;
     }
 
+        // Increment the distance traveled by the horse
+        public void incrementDistance(int distance) {
+            this.distanceTravelled += distance; // Add the distance moved to the total distance
+        }
+
+
     public void setConfidence(double newConfidence) {
         this.confidence = newConfidence;
     }

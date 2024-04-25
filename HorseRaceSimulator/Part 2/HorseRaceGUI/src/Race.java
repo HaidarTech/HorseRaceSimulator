@@ -4,6 +4,8 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.Random;
+
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 
 public class Race {
@@ -16,6 +18,7 @@ public class Race {
     Random rand = new Random();
     private long startTime;  // To capture the start time of the race
     private String winningHorse = null;
+    private int betAmount;  // Store bet amount here
     private Points pointsManager;  // Use Points class for managing points
     private RaceTrack raceTrack;  // Instance of RaceTrack class
     private RaceStatistics raceStatistics; // Instance of RaceStatistics class
@@ -25,7 +28,8 @@ public class Race {
         this.raceStage = raceStage;
         this.primaryStage = primaryStage;
         this.pointsManager = pointsManager;
-        this.raceTrack = new RaceTrack(raceTrackPane, raceLength);
+        this.betAmount = betAmount;  // Initialize betAmount
+        this.raceTrack = new RaceTrack(raceTrackPane, raceLength, primaryStage);
         this.startTime = System.currentTimeMillis(); // Initialize start time
         this.raceStatistics = new RaceStatistics(); // Initialize the race statistics
         startRace();
@@ -64,30 +68,49 @@ public class Race {
     }
 
     private void moveHorses() {
-        boolean allFinished = true;
+        String currentLeader = "";
+        double maxPosition = 0;
+        boolean raceOfficiallyFinished = false;
+    
         for (int i = 0; i < horseViews.length; i++) {
             ImageView horseView = horseViews[i];
             Horse horse = horses[i];
-            if (!horse.hasFallen() && horseView.getX() < raceLength) {
-                double xPosition = horseView.getX() + rand.nextInt(3) + 1;
-                if (xPosition >= raceLength - 30) {
-                    xPosition = raceLength;
-                    if (horse.getLastRaceTime() == 0) {  // Ensure last race time is set only once
-                        long finishTime = System.currentTimeMillis();
-                        double raceTime = (finishTime - startTime) / 1000.0;
-                        horse.setLastRaceTime(raceTime);
-                    }
-                } else {
-                    allFinished = false;
-                    horseView.setX(xPosition);
+            double xPosition = horseView.getX();
+    
+            if (!horse.hasFallen() && xPosition < raceLength) {
+                int moveDistance = rand.nextInt(3) + 1;
+                xPosition += moveDistance;
+                horseView.setX(xPosition);
+                horse.incrementDistance(moveDistance);
+    
+                if (xPosition > maxPosition) {
+                    maxPosition = xPosition;
+                    currentLeader = horse.getName();
+                    raceTrack.updateCurrentLeader(currentLeader);
+                }
+            }
+    
+            if (xPosition >= raceLength - 50 && !horse.hasFallen()) {
+                horse.setLastRaceTime((System.currentTimeMillis() - startTime) / 1000.0);
+                horse.fall();
+                if (!raceOfficiallyFinished) {
+                    winningHorse = horse.getName();
+                    raceOfficiallyFinished = true;
+                    System.out.println("Horse " + horse.getName() + " finished first with time " + horse.getLastRaceTime() + "s and distance " + horse.getDistanceTravelled() + "m");
                 }
             }
         }
-        
-        if (allFinished) {
-            finishRace();
+    
+        if (raceOfficiallyFinished) {
+            timeline.stop();  // Only stop the timeline when all horses have finished or fallen
+            System.out.println("Race officially finished. Winner: " + winningHorse);
+            finishRace(winningHorse);
         }
     }
+    
+    
+    
+    
 
     private void updateRaceStatistics() {
         if (raceStatistics != null) {
@@ -95,27 +118,54 @@ public class Race {
         }
     }
     
-    private void finishRace() {
-        StringBuilder resultsBuilder = new StringBuilder();
-        resultsBuilder.append("Race Finished. Results:\n");
+    private void finishRace(String currentLeader) {
+        System.out.println("Finishing race and calculating results...");
+        StringBuilder resultsBuilder = new StringBuilder("Race Finished. Results:\n");
+        double bestTime = Double.MAX_VALUE;
+        String winnerName = currentLeader; // Start with the current leader as the presumed winner
+    
         for (Horse horse : horses) {
+            double time = horse.getLastRaceTime();
             resultsBuilder.append(horse.getName())
                           .append(": Time = ")
-                          .append(String.format("%.2f", horse.getLastRaceTime()))
+                          .append(String.format("%.2f", time))
                           .append("s, Distance = ")
                           .append(horse.getDistanceTravelled())
                           .append("m\n");
+    
+            System.out.println("Checking horse " + horse.getName() + " - Time: " + time + "s, Distance: " + horse.getDistanceTravelled() + "m, Fallen: " + horse.hasFallen());
+    
+            if (!horse.hasFallen() && time < bestTime) {
+                bestTime = time;
+                winnerName = horse.getName();
+            }
         }
     
-        // Update the race track with results
-        raceTrack.updateResults(resultsBuilder.toString());
+        System.out.println("Current Leader at finish: " + currentLeader);
     
-        // Close stages and finalize the race
-        raceStage.close();
-        primaryStage.close();
-        updateRaceStatistics();  // Update stats and save
-        raceStatistics.saveStatistics();  // Explicitly save to file after updating
+        raceTrack.updateResults(resultsBuilder.toString());
+        if (!winnerName.isEmpty()) {
+            raceTrack.showWinnerMessage(winnerName); // Change here to just pass winnerName
+            System.out.println("Winner determined: " + winnerName);
+            pointsManager.updatePoints(winnerName.equals(winningHorse), betAmount);  // Update points based on the outcome
+        } else {
+            raceTrack.showWinnerMessage("No valid winner could be determined.");
+            System.out.println("No valid winner could be determined or current leader does not match the fastest horse.");
+        }
+    
+        if (raceStatistics != null) {
+            raceStatistics.updateRaceStats(this);
+            raceStatistics.saveStatistics();
+        }
     }
+    
+    
+    
+    
+    
+    
+    
+    
     
     public String getWinningHorse() {
         return winningHorse;
